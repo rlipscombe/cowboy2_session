@@ -4,7 +4,7 @@ Session-handling middleware for Cowboy 2.x.
 
 ## Motivation
 
-All of the session middleware I could find for Cowboy only seems to work with Cowboy 2.x.
+All of the session middleware I could find for Cowboy only seems to work with Cowboy 1.x. Here's some that works with Cowboy 2.x.
 
 ## Dependency
 
