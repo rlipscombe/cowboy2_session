@@ -1,0 +1,15 @@
+{application, cowboy2_session,
+ [{description, "Session handling middleware for Cowboy 2.x"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {cowboy2_session_app, []}},
+  {applications,
+   [kernel,
+    stdlib
+   ]},
+  {env,[]},
+  {modules, []},
+
+  {licenses, ["Apache-2.0"]},
+  {links, []}
+ ]}.
