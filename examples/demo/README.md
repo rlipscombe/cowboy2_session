@@ -15,6 +15,5 @@ Browse to http://localhost:8907
 ```sh
 cd examples/demo
 mkdir -p _checkouts
-cd _checkouts/
-ln -s ../../../../cowboy2_session .
+( cd _checkouts/ && ln -s ../../../../cowboy2_session . )
 ```
