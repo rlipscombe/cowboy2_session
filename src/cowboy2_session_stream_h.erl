@@ -9,19 +9,11 @@
 -define(COOKIE_NAME, <<"sessionid">>).
 -define(SESSION_ID_LEN_BYTES, 32).
 -define(TABLE_NAME, cowboy2_session_table).
--define(MIDDLEWARE_MODULE, cowboy2_session_middleware).
 
-init(StreamId, Req0, Opts0) ->
-    Opts = add_middleware(Opts0),
+init(StreamId, Req0, Opts) ->
     Req = init_session(Req0),
     {Commands, Next} = cowboy_stream:init(StreamId, Req, Opts),
     {Commands, #{next => Next}}.
-
-add_middleware(Opts) ->
-    maps:update_with(middlewares,
-                     fun(Middlewares) -> Middlewares ++ [?MIDDLEWARE_MODULE] end,
-                     [cowboy_router, cowboy_handler, ?MIDDLEWARE_MODULE],
-                     Opts).
 
 init_session(Req) ->
     Cookies = cowboy_req:parse_cookies(Req),
