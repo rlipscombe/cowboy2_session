@@ -29,12 +29,20 @@ Add it to `stream_handlers` when starting cowboy, as follows:
                              stream_handlers => [cowboy2_session_stream_h, cowboy_stream_h]}),
 ```
 
-It adds a `session` key to the `Req` object in all of your handlers:
+Use the session object like this:
 
 ```erlang
-init(Req = #{session := Session}, Opts) ->
-    %...
-    {ok, Req#{session => NewSession}, Opts}.
+init(Req, Opts) ->
+    % Get the session details from the request object.
+    Session = cowboy2_session:get_session(Req),
+
+    % ... do something interesting ...
+
+    % Put updated session details in the request object.
+    Req2 = cowboy2_session:put_session(NewSession, Req),
+    % Send the response to the client.
+    Req3 = cowboy_req:reply(200, Headers, Body, Req2),
+    {ok, Req3, Opts}.
 ```
 
 ## What's missing?
