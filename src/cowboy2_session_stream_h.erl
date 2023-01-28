@@ -38,7 +38,7 @@ init_session_3(_, _, Req) ->
 init_new_session(Req0) ->
     NewSessionId =
         base64url:encode(
-            rand:bytes(?SESSION_ID_LEN_BYTES)),
+            crypto:strong_rand_bytes(?SESSION_ID_LEN_BYTES)),
     Req = Req0#{session_id => NewSessionId, session => #{}},
     % TODO: HttpOnly, Secure, etc.
     CookieOpts = #{},
