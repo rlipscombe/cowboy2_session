@@ -29,8 +29,9 @@ renew_session_id(Req0 = #{session_id := OldSessionId, session := Session}) ->
                  old_session_id => OldSessionId,
                  new_session_id => NewSessionId}),
     % TODO: HttpOnly, Secure, etc.
-    CookieOpts = #{},
+    CookieOpts = #{path => "/"},
     ?LOG_INFO(#{resp_cookies => maps:get(resp_cookies, Req, #{})}),
+    ?LOG_NOTICE(#{set_resp_cookie => NewSessionId}),
     Req2 = cowboy_req:set_resp_cookie(?COOKIE_NAME, NewSessionId, Req, CookieOpts),
     ?LOG_INFO(#{resp_cookies => maps:get(new_resp_cookies, Req2, #{})}),
     Req2.

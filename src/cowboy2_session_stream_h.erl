@@ -33,13 +33,17 @@ init_session_3(_, _, Req) ->
     init_new_session(Req).
 
 init_new_session(Req0) ->
-    ?LOG_DEBUG(#{msg => new_session}),
     NewSessionId =
         base64url:encode(
-            crypto:strong_rand_bytes(?SESSION_ID_LEN_BYTES)),
-    Req = Req0#{session_id => NewSessionId, session => #{}},
+            crypto:strong_rand_bytes(?SESSION_ID_LEN_BYTES)
+        ),
+    ?LOG_DEBUG(#{msg => new_session, session_id => NewSessionId}),
+    NewSession = #{},
+    ets:insert(?TABLE_NAME, {NewSessionId, NewSession}),
+    Req = Req0#{session_id => NewSessionId, session => NewSession},
     % TODO: HttpOnly, Secure, etc.
-    CookieOpts = #{},
+    CookieOpts = #{path => "/"},
+    ?LOG_NOTICE(#{set_resp_cookie => NewSessionId}),
     cowboy_req:set_resp_cookie(?COOKIE_NAME, NewSessionId, Req, CookieOpts).
 
 data(StreamId, IsFin, Data, _State = #{next := Next0}) ->
