@@ -16,6 +16,7 @@ put_session(Session, Req = #{session_id := SessionId}) ->
     Req#{?MODULE => {SessionId, Session}}.
 
 renew_session_id(_Req = #{has_sent_resp := _}) ->
+    % We can't change the session ID in the cookie, because we've already sent the headers to the client.
     error(already_sent);
 renew_session_id(Req0 = #{session_id := OldSessionId, session := Session}) ->
     NewSessionId =
