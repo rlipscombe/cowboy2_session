@@ -1,6 +1,6 @@
 -module(cowboy2_session).
 
--export([get_session/1, put_session/2, renew_session_id/1]).
+-export([get_session/1, put_session/2, delete_session/1, renew_session_id/1]).
 
 -include_lib("kernel/include/logger.hrl").
 
@@ -14,6 +14,11 @@ get_session(_Req = #{session := Session}) ->
 put_session(Session, Req = #{session_id := SessionId}) ->
     ets:insert(?TABLE_NAME, {SessionId, Session}),
     Req#{?MODULE => {SessionId, Session}}.
+
+delete_session(Req = #{session_id := SessionId}) ->
+    ets:delete(?TABLE_NAME, SessionId),
+    CookieOpts = #{path => "/", max_age => 0},
+    cowboy_req:set_resp_cookie(?COOKIE_NAME, <<>>, Req, CookieOpts).
 
 renew_session_id(_Req = #{has_sent_resp := _}) ->
     % We can't change the session ID in the cookie, because we've already sent the headers to the client.
