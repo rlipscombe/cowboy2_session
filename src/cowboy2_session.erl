@@ -23,7 +23,7 @@ delete_session(Req = #{session_id := SessionId}) ->
 renew_session_id(_Req = #{has_sent_resp := _}) ->
     % We can't change the session ID in the cookie, because we've already sent the headers to the client.
     error(already_sent);
-renew_session_id(Req0 = #{session_id := OldSessionId, session := Session}) ->
+renew_session_id(Req0 = #{session_id := OldSessionId, session := Session, session_opts := #{cookie_opts := CookieOpts}}) ->
     NewSessionId =
         base64url:encode(
             crypto:strong_rand_bytes(?SESSION_ID_LEN_BYTES)),
@@ -33,8 +33,6 @@ renew_session_id(Req0 = #{session_id := OldSessionId, session := Session}) ->
     ?LOG_DEBUG(#{msg => renew_session_id,
                  old_session_id => OldSessionId,
                  new_session_id => NewSessionId}),
-    % TODO: HttpOnly, Secure, etc.
-    CookieOpts = #{path => "/"},
     ?LOG_INFO(#{resp_cookies => maps:get(resp_cookies, Req, #{})}),
     ?LOG_NOTICE(#{set_resp_cookie => NewSessionId}),
     Req2 = cowboy_req:set_resp_cookie(?COOKIE_NAME, NewSessionId, Req, CookieOpts),

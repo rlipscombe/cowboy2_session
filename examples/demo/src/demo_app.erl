@@ -9,10 +9,15 @@
 start(_StartType, _StartArgs) ->
     Dispatch = cowboy_router:compile([{'_', [{"/", home_handler, []}]}]),
     {ok, _} =
-        cowboy:start_clear(http,
-                           [{port, ?PORT}],
-                           #{env => #{dispatch => Dispatch},
-                             stream_handlers => [cowboy2_session_stream_h, cowboy_stream_h]}),
+        cowboy:start_clear(
+            http,
+            [{port, ?PORT}],
+            #{
+                env => #{dispatch => Dispatch},
+                session_opts => #{cookie_opts => #{path => "/"}},
+                stream_handlers => [cowboy2_session_stream_h, cowboy_stream_h]
+            }
+        ),
     io:format("Listening on http://localhost:~B~n", [?PORT]),
     demo_sup:start_link().
 
