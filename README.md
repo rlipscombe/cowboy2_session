@@ -26,6 +26,9 @@ Add it to `stream_handlers` when starting cowboy, as follows:
 ```erlang
 {ok, _} = cowboy:start_clear(http, [{port, ?PORT}],
                            #{env => #{dispatch => Dispatch},
+                             % Example cookie options; change as appropriate
+                             session_opts => #{cookie_opts => #{path => "/", http_only => true}},
+                             % Put cowboy2_session_stream_h before cowboy_stream_h.
                              stream_handlers => [cowboy2_session_stream_h, cowboy_stream_h]}),
 ```
 
