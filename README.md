@@ -49,9 +49,8 @@ init(Req, Opts) ->
 
 It's brand-new, so there's some bits missing.
 
-- You can't configure the cookie options, so no `HttpOnly`, `Secure`, `SameSite`, etc.
 - You can't configure the cookie name.
 - ...or the ETS table name.
 - ...or the default session object.
-- Sessions don't expire and can't be revoked.
+- Sessions don't expire.
 - The only storage supported is ETS, so you can't use it behind a load-balancer.
