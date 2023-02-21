@@ -42,7 +42,7 @@ init_new_session(Req0, Opts) ->
     NewSession = #{},
     ets:insert(?TABLE_NAME, {NewSessionId, NewSession}),
     Req = Req0#{session_id => NewSessionId, session => NewSession, session_opts => #{cookie_opts => CookieOpts}},
-    ?LOG_NOTICE(#{set_resp_cookie => NewSessionId}),
+    ?LOG_DEBUG(#{set_resp_cookie => NewSessionId}),
     cowboy_req:set_resp_cookie(?COOKIE_NAME, NewSessionId, Req, CookieOpts).
 
 get_cookie_opts(_Opts = #{session_opts := #{cookie_opts := CookieOpts}}) ->
