@@ -15,7 +15,7 @@ get_session(_Req = #{session := Session}) ->
 -spec put_session(Req :: cowboy_req:req(), Session :: term()) -> cowboy_req:req().
 put_session(Session, Req = #{session_id := SessionId}) ->
     ets:insert(?TABLE_NAME, {SessionId, Session}),
-    Req#{?MODULE => {SessionId, Session}}.
+    Req#{session => Session}.
 
 -spec delete_session(Req :: cowboy_req:req()) -> cowboy_req:req().
 delete_session(Req = #{session_id := SessionId}) ->
