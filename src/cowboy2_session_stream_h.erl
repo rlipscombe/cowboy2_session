@@ -7,48 +7,34 @@
 -include_lib("kernel/include/logger.hrl").
 
 -define(COOKIE_NAME, <<"sessionid">>).
--define(SESSION_ID_LEN_BYTES, 32).
 -define(TABLE_NAME, cowboy2_session_table).
 
 init(StreamId, Req0, Opts) ->
-    Req = init_session(Req0, Opts),
+    SessionOpts = maps:get(session_opts, Opts, #{}),
+    Req = init_session(Req0, SessionOpts),
     {Commands, Next} = cowboy_stream:init(StreamId, Req, Opts),
     {Commands, #{next => Next}}.
 
-init_session(Req, Opts) ->
+init_session(Req, SessionOpts) ->
     Cookies = cowboy_req:parse_cookies(Req),
-    init_session_2(lists:keyfind(?COOKIE_NAME, 1, Cookies), Req, Opts).
+    init_session_2(lists:keyfind(?COOKIE_NAME, 1, Cookies), Req, SessionOpts).
 
-init_session_2({_, SessionId}, Req, Opts) ->
+init_session_2({_, SessionId}, Req, SessionOpts) ->
+    % We've got a session cookie; is there a session object in ETS?
     ?LOG_DEBUG(#{msg => got_cookie, session_id => SessionId}),
-    init_session_3(SessionId, ets:lookup(?TABLE_NAME, SessionId), Req, Opts);
-init_session_2(_, Req, Opts) ->
+    init_session_3(SessionId, ets:lookup(?TABLE_NAME, SessionId), Req, SessionOpts);
+init_session_2(_, Req, SessionOpts) ->
+    % We didn't get a session cookie.
     ?LOG_DEBUG(#{msg => no_cookie}),
-    init_new_session(Req, Opts).
+    Req#{session_opts => SessionOpts}.
 
-init_session_3(SessionId, [{_, Session}], Req, _Opts) ->
+init_session_3(SessionId, [{_, Session}], Req, SessionOpts) ->
+    % We found the session in ETS.
     ?LOG_DEBUG(#{msg => existing_session}),
-    Req#{session_id => SessionId, session => Session};
-init_session_3(_, _, Req, Opts) ->
-    init_new_session(Req, Opts).
-
-init_new_session(Req0, Opts) ->
-    CookieOpts = get_cookie_opts(Opts),
-    NewSessionId =
-        base64url:encode(
-            crypto:strong_rand_bytes(?SESSION_ID_LEN_BYTES)
-        ),
-    ?LOG_DEBUG(#{msg => new_session, session_id => NewSessionId}),
-    NewSession = #{},
-    ets:insert(?TABLE_NAME, {NewSessionId, NewSession}),
-    Req = Req0#{session_id => NewSessionId, session => NewSession, session_opts => #{cookie_opts => CookieOpts}},
-    ?LOG_DEBUG(#{set_resp_cookie => NewSessionId}),
-    cowboy_req:set_resp_cookie(?COOKIE_NAME, NewSessionId, Req, CookieOpts).
-
-get_cookie_opts(_Opts = #{session_opts := #{cookie_opts := CookieOpts}}) ->
-    CookieOpts;
-get_cookie_opts(_Opts) ->
-    #{path => "/"}.
+    Req#{session_id => SessionId, session => Session, session_opts => SessionOpts};
+init_session_3(_, _, Req, SessionOpts) ->
+    % We didn't find the session in ETS.
+    Req#{session_opts => SessionOpts}.
 
 data(StreamId, IsFin, Data, _State = #{next := Next0}) ->
     {Commands, Next} = cowboy_stream:data(StreamId, IsFin, Data, Next0),
