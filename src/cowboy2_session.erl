@@ -8,18 +8,22 @@
 -define(TABLE_NAME, cowboy2_session_table).
 -define(SESSION_ID_LEN_BYTES, 32).
 
+-spec get_session(Req :: cowboy_req:req()) -> Session :: term().
 get_session(_Req = #{session := Session}) ->
     Session.
 
+-spec put_session(Req :: cowboy_req:req(), Session :: term()) -> cowboy_req:req().
 put_session(Session, Req = #{session_id := SessionId}) ->
     ets:insert(?TABLE_NAME, {SessionId, Session}),
     Req#{?MODULE => {SessionId, Session}}.
 
+-spec delete_session(Req :: cowboy_req:req()) -> cowboy_req:req().
 delete_session(Req = #{session_id := SessionId}) ->
     ets:delete(?TABLE_NAME, SessionId),
     CookieOpts = #{path => "/", max_age => 0},
     cowboy_req:set_resp_cookie(?COOKIE_NAME, <<>>, Req, CookieOpts).
 
+-spec renew_session_id(Req :: cowboy_req:req()) -> cowboy_req:req().
 renew_session_id(_Req = #{has_sent_resp := _}) ->
     % We can't change the session ID in the cookie, because we've already sent the headers to the client.
     error(already_sent);
