@@ -18,7 +18,7 @@ get_session(_Req = #{session := Session}, _Default) ->
 get_session(_Req, Default) ->
     Default.
 
--spec put_session(Req :: cowboy_req:req(), Session :: term()) -> cowboy_req:req().
+-spec put_session(Session :: term(), Req :: cowboy_req:req()) -> cowboy_req:req().
 put_session(Session, Req = #{session_id := SessionId}) ->
     % We have a session ID; update the session.
     ets:insert(?TABLE_NAME, {SessionId, Session}),
