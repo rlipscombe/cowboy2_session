@@ -21,7 +21,7 @@ put_session(Session, Req = #{session_id := SessionId}) ->
 delete_session(Req = #{session_id := SessionId}) ->
     ets:delete(?TABLE_NAME, SessionId),
     CookieOpts = #{path => "/", max_age => 0},
-    cowboy_req:set_resp_cookie(?COOKIE_NAME, <<>>, Req, CookieOpts).
+    cowboy_req:set_resp_cookie(?COOKIE_NAME, <<>>, maps:remove(session_id, Req), CookieOpts).
 
 -spec renew_session_id(Req :: cowboy_req:req()) -> cowboy_req:req().
 renew_session_id(_Req = #{has_sent_resp := _}) ->
