@@ -1,6 +1,6 @@
 -module(cowboy2_session_stream_h).
 
--behaviour(cowboy_stream).
+%-behaviour(cowboy_stream).
 
 -export([init/3, data/4, info/3, terminate/3, early_error/5]).
 
