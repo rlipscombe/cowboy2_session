@@ -30,7 +30,12 @@ put_session(Session, Req) ->
             crypto:strong_rand_bytes(?SESSION_ID_LEN_BYTES)
         ),
     ets:insert(?TABLE_NAME, {SessionId, Session}),
-    cowboy_req:set_resp_cookie(?COOKIE_NAME, SessionId, Req#{session_id => SessionId, session => Session}, get_cookie_opts(Req)).
+    cowboy_req:set_resp_cookie(
+        ?COOKIE_NAME,
+        SessionId,
+        Req#{session_id => SessionId, session => Session},
+        get_cookie_opts(Req)
+    ).
 
 get_cookie_opts(_Req = #{session_opts := #{cookie_opts := CookieOpts = #{path := _Path}}}) ->
     CookieOpts;
@@ -77,10 +82,14 @@ renew_session_id(
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
-get_cookie_opts_enforces_path_test_() -> [
-    ?_assertMatch(#{path := "/"}, get_cookie_opts(#{})),
-    ?_assertMatch(#{path := "/"}, get_cookie_opts(#{session_opts => #{}})),
-    ?_assertMatch(#{path := "/"}, get_cookie_opts(#{session_opts => #{cookie_opts => #{}}})),
-    ?_assertMatch(#{path := "/foo"}, get_cookie_opts(#{session_opts => #{cookie_opts => #{path => "/foo"}}}))
-].
+get_cookie_opts_enforces_path_test_() ->
+    [
+        ?_assertMatch(#{path := "/"}, get_cookie_opts(#{})),
+        ?_assertMatch(#{path := "/"}, get_cookie_opts(#{session_opts => #{}})),
+        ?_assertMatch(#{path := "/"}, get_cookie_opts(#{session_opts => #{cookie_opts => #{}}})),
+        ?_assertMatch(
+            #{path := "/foo"},
+            get_cookie_opts(#{session_opts => #{cookie_opts => #{path => "/foo"}}})
+        )
+    ].
 -endif.

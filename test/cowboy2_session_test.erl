@@ -96,7 +96,9 @@ with_cookie_and_session__get_previous_session() ->
             {ok, cowboy_req:reply(200, #{}, <<"OK">>, Req2), Opts}
         end),
     {_, SetCookie} = lists:keyfind("set-cookie", 1, RespHeaders),
-    {ok, CookieName, CookieValue, _CookieOpts} = cow_cookie:parse_set_cookie(list_to_binary(SetCookie)),
+    {ok, CookieName, CookieValue, _CookieOpts} = cow_cookie:parse_set_cookie(
+        list_to_binary(SetCookie)
+    ),
     ReqHeaders = [{"cookie", io_lib:format("~s=~s", [CookieName, CookieValue])}],
     {ok, 200, _, _} = with_cowboy(ReqHeaders, fun(Req, Opts) ->
         ?assertEqual(Session, cowboy2_session:get_session(Req)),
